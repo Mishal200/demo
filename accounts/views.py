@@ -4,7 +4,6 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth import logout
 
-
 def register(request):
     if request.method == "POST":
 
@@ -27,7 +26,6 @@ def register(request):
 
     return render(request, "register.html")
 
-
 def user_login(request):
 
     if request.method == "POST":
@@ -47,7 +45,6 @@ def user_login(request):
         messages.error(request, "Invalid username or password")
 
     return render(request, "login.html")
-
 
 def user_logout(request):
 

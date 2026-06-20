@@ -5,7 +5,6 @@ from .models import Message
 from django.db.models import Q
 from accounts.models import UserProfile
 
-
 @login_required
 def home(request):
 

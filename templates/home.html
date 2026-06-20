@@ -80,8 +80,6 @@
 
 <div class="chat-container">
 
-    <!-- Sidebar -->
-
     <div class="sidebar">
 
         <h4 class="p-3">
@@ -125,8 +123,6 @@
         {% endfor %}
 
     </div>
-
-    <!-- Chat Window -->
 
     <div class="chat-window">
 
@@ -223,12 +219,10 @@
 
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Receive messages
     chatSocket.onmessage = function (e) {
 
         const data = JSON.parse(e.data);
 
-        // Typing Indicator
         if (data.type === "typing") {
 
             if (data.username !== "{{ request.user.username }}") {
@@ -246,7 +240,6 @@
             return;
         }
 
-        // New Message
         chatBox.innerHTML += `
         <div class="message ${data.username == "{{ request.user.username }}" ? "mine" : ""}">
             <strong>${data.username}</strong><br>
@@ -258,7 +251,6 @@
 
     };
 
-    // Send Message
     form.addEventListener("submit", function (e) {
 
         e.preventDefault();
@@ -277,7 +269,6 @@
 
         }));
 
-        // Stop typing
         chatSocket.send(JSON.stringify({
 
             action: "typing",
@@ -292,7 +283,6 @@
 
     });
 
-    // Typing Indicator
     let typingTimer;
 
     input.addEventListener("keyup", function () {
