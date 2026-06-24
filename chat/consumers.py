@@ -26,7 +26,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         action = data.get("action")
 
-        # Typing Indicator
+
         if action == "typing":
 
             await self.channel_layer.group_send(
@@ -39,12 +39,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             return
 
-        # Chat Message
+
         message = data["message"]
         sender_id = data["sender_id"]
         receiver_id = data["receiver_id"]
 
-        # Save message in database
+
         await self.save_message(
             sender_id,
             receiver_id,
@@ -53,7 +53,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
         username = await self.get_username(sender_id)
 
-        # Send to everyone in room
         await self.channel_layer.group_send(
             self.room_group_name,
             {
