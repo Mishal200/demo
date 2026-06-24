@@ -1,148 +1,214 @@
-```html
 {% extends 'base.html' %}
 
 {% block content %}
 
 <style>
-    .chat-container {
-        display: flex;
-        height: 80vh;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        overflow: hidden;
-    }
 
-    .sidebar {
-        width: 30%;
-        background: #f8f9fa;
-        border-right: 1px solid #ddd;
-        overflow-y: auto;
-    }
+.chat-container{
+    display:flex;
+    height:80vh;
+    background:#ffffff;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+}
 
-    .chat-window {
-        width: 70%;
-        display: flex;
-        flex-direction: column;
-        background: white;
-    }
+.sidebar{
+    width:30%;
+    background:#fff;
+    border-right:1px solid #e5e5e5;
+    overflow-y:auto;
+}
 
-    .user-item {
-        padding: 15px;
-        border-bottom: 1px solid #eee;
-        transition: .3s;
-    }
+.sidebar-title{
+    padding:20px;
+    font-size:24px;
+    font-weight:700;
+    border-bottom:1px solid #eee;
+}
 
-    .user-item:hover {
-        background: #ececec;
-    }
+.user-item{
+    display:flex;
+    align-items:center;
+    padding:15px;
+    border-bottom:1px solid #f1f1f1;
+    transition:.3s;
+}
 
-    .messages {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-    }
+.user-item:hover{
+    background:#f8f9fa;
+}
 
-    .message {
-        background: #f1f1f1;
-        padding: 10px;
-        margin-bottom: 15px;
-        border-radius: 10px;
-        max-width: 70%;
-    }
+.avatar{
+    width:50px;
+    height:50px;
+    border-radius:50%;
+    background:#0d6efd;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:20px;
+    font-weight:bold;
+    margin-right:12px;
+}
 
-    .mine {
-        background: #dcf8c6;
-        margin-left: auto;
-        text-align: right;
-    }
+.chat-window{
+    width:70%;
+    display:flex;
+    flex-direction:column;
+    background:#f7f8fa;
+}
 
-    .send-box {
-        display: flex;
-        padding: 15px;
-        border-top: 1px solid #ddd;
-    }
+.chat-header{
+    background:white;
+    padding:18px 25px;
+    border-bottom:1px solid #e5e5e5;
+    font-size:22px;
+    font-weight:600;
+}
 
-    .send-box input {
-        flex: 1;
-        margin-right: 10px;
-    }
+.messages{
+    flex:1;
+    overflow-y:auto;
+    padding:25px;
+}
 
-    .online {
-        color: green;
-        font-size: 13px;
-    }
+.message{
+    background:white;
+    padding:12px 15px;
+    border-radius:15px;
+    margin-bottom:15px;
+    max-width:60%;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
 
-    .offline {
-        color: gray;
-        font-size: 13px;
-    }
+.mine{
+    background:#d9fdd3;
+    margin-left:auto;
+    text-align:right;
+}
+
+.message small{
+    display:block;
+    margin-top:5px;
+    color:#666;
+    font-size:12px;
+}
+
+.send-box{
+    display:flex;
+    padding:15px;
+    background:white;
+    border-top:1px solid #ddd;
+}
+
+.send-box input{
+    flex:1;
+    margin-right:10px;
+    border-radius:25px;
+    padding:12px 20px;
+}
+
+.send-box button{
+    border-radius:25px;
+    padding:10px 25px;
+}
+
+.online{
+    color:green;
+    font-size:13px;
+}
+
+.offline{
+    color:gray;
+    font-size:13px;
+}
+
+#typing-status{
+    color:green;
+    font-style:italic;
+    margin-bottom:10px;
+}
+
 </style>
 
 <div class="chat-container">
 
+    <!-- SIDEBAR -->
+
     <div class="sidebar">
 
-        <h4 class="p-3">
+        <div class="sidebar-title">
             Users
-        </h4>
+        </div>
 
         {% for u in users %}
 
-        <a href="{% url 'chat_room' u.user.id %}" style="text-decoration:none;color:black;">
+            {% if u.user and u.user.id %}
 
-            <div class="user-item">
+            <a href="{% url 'chat_room' u.user.id %}"
+               class="text-decoration-none text-dark">
 
-                <strong>{{ u.user.username }}</strong>
+                <div class="user-item">
 
-                <br>
+                    <div class="avatar">
+                        {{ u.user.username|first|upper }}
+                    </div>
 
-                {% if u.is_online %}
+                    <div>
 
-                <span class="online">
-                    🟢 Online
-                </span>
+                        <strong>
+                            {{ u.user.username }}
+                        </strong>
 
-                {% else %}
+                        <br>
 
-                <span class="offline">
-                    ⚪ Offline
-                </span>
+                        {% if u.is_online %}
+                            <span class="online">🟢 Online</span>
+                        {% else %}
+                            <span class="offline">⚪ Offline</span>
+                        {% endif %}
 
-                {% endif %}
+                    </div>
 
-            </div>
+                </div>
 
-        </a>
+            </a>
+
+            {% endif %}
 
         {% empty %}
 
-        <p class="p-3">
-            No users found.
-        </p>
+            <p class="p-3">
+                No users found.
+            </p>
 
         {% endfor %}
 
     </div>
 
+    <!-- CHAT WINDOW -->
+
     <div class="chat-window">
 
         {% if receiver %}
 
-        <h4 class="p-3 border-bottom">
-
+        <div class="chat-header">
             Chat with {{ receiver.username }}
-
-        </h4>
+        </div>
 
         <div id="chat-box" class="messages">
-            <p id="typing-status" style="color:green;padding-left:20px;font-style:italic;">
-            </p>
+
+            <div id="typing-status"></div>
 
             {% for msg in messages %}
 
             <div class="message {% if msg.sender == request.user %}mine{% endif %}">
 
-                <strong>{{ msg.sender.username }}</strong>
+                <strong>
+                    {{ msg.sender.username }}
+                </strong>
 
                 <br>
 
@@ -151,9 +217,7 @@
                 <br>
 
                 <small>
-
                     {{ msg.timestamp|date:"d M Y h:i A" }}
-
                 </small>
 
             </div>
@@ -172,13 +236,19 @@
 
             <div class="send-box">
 
-                <input id="chat-message-input" class="form-control" placeholder="Type a message..." autocomplete="off"
-                    required>
+                <input
+                    type="text"
+                    id="chat-message-input"
+                    class="form-control"
+                    placeholder="Type a message..."
+                    autocomplete="off"
+                    required
+                >
 
-                <button class="btn btn-primary">
-
+                <button
+                    type="submit"
+                    class="btn btn-primary">
                     Send
-
                 </button>
 
             </div>
@@ -189,10 +259,8 @@
 
         <div class="d-flex justify-content-center align-items-center h-100">
 
-            <h3>
-
+            <h3 class="text-muted">
                 Select a user to start chatting
-
             </h3>
 
         </div>
@@ -203,71 +271,110 @@
 
 </div>
 
+<!-- KEEP YOUR EXISTING WEBSOCKET SCRIPT BELOW THIS -->
 {% if receiver %}
 
 <script>
 
-    const roomName = "{{ room_name }}";
+const roomName = "{{ room_name }}";
 
-    const chatSocket = new WebSocket(
-        "ws://" + window.location.host + "/ws/chat/" + roomName + "/"
-    );
+const chatSocket = new WebSocket(
+    "ws://" + window.location.host + "/ws/chat/" + roomName + "/"
+);
 
-    const chatBox = document.getElementById("chat-box");
-    const input = document.getElementById("chat-message-input");
-    const form = document.getElementById("chat-form");
+chatSocket.onopen = function () {
+    console.log("WebSocket Connected");
+};
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+chatSocket.onerror = function (e) {
+    console.log("WebSocket Error", e);
+};
 
-    chatSocket.onmessage = function (e) {
+chatSocket.onclose = function () {
+    console.log("WebSocket Closed");
+};
 
-        const data = JSON.parse(e.data);
+const chatBox = document.getElementById("chat-box");
+const input = document.getElementById("chat-message-input");
+const form = document.getElementById("chat-form");
 
-        if (data.type === "typing") {
+chatSocket.onmessage = function(e){
 
-            if (data.username !== "{{ request.user.username }}") {
+    const data = JSON.parse(e.data);
 
-                const typing = document.getElementById("typing-status");
+    if(data.type === "typing"){
 
-                if (data.typing) {
-                    typing.innerHTML = data.username + " is typing...";
-                } else {
-                    typing.innerHTML = "";
-                }
+        const typing =
+            document.getElementById("typing-status");
 
+        if(data.username !== "{{ request.user.username }}"){
+
+            if(data.typing){
+                typing.innerHTML =
+                    data.username + " is typing...";
+            }else{
+                typing.innerHTML = "";
             }
-
-            return;
         }
 
-        chatBox.innerHTML += `
-        <div class="message ${data.username == "{{ request.user.username }}" ? "mine" : ""}">
+        return;
+    }
+
+    chatBox.innerHTML += `
+        <div class="message ${
+            data.username === "{{ request.user.username }}"
+            ? "mine"
+            : ""
+        }">
             <strong>${data.username}</strong><br>
             ${data.message}
         </div>
     `;
 
-        chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop = chatBox.scrollHeight;
+};
 
-    };
+form.addEventListener("submit", function(e){
 
-    form.addEventListener("submit", function (e) {
+    e.preventDefault();
 
-        e.preventDefault();
+    const message = input.value.trim();
 
-        if (input.value.trim() === "") {
-            return;
-        }
+    if(message === ""){
+        return;
+    }
 
-        chatSocket.send(JSON.stringify({
+    chatSocket.send(JSON.stringify({
 
-            message: input.value,
+        message: message,
 
-            sender_id: "{{ request.user.id }}",
+        sender_id: "{{ request.user.id }}",
 
-            receiver_id: "{{ receiver.id }}"
+        receiver_id: "{{ receiver.id }}"
 
-        }));
+    }));
+
+    input.value = "";
+
+});
+
+let typingTimer;
+
+input.addEventListener("keyup", function(){
+
+    chatSocket.send(JSON.stringify({
+
+        action: "typing",
+
+        username: "{{ request.user.username }}",
+
+        typing: true
+
+    }));
+
+    clearTimeout(typingTimer);
+
+    typingTimer = setTimeout(function(){
 
         chatSocket.send(JSON.stringify({
 
@@ -279,45 +386,11 @@
 
         }));
 
-        input.value = "";
+    }, 1000);
 
-    });
-
-    let typingTimer;
-
-    input.addEventListener("keyup", function () {
-
-        chatSocket.send(JSON.stringify({
-
-            action: "typing",
-
-            username: "{{ request.user.username }}",
-
-            typing: true
-
-        }));
-
-        clearTimeout(typingTimer);
-
-        typingTimer = setTimeout(function () {
-
-            chatSocket.send(JSON.stringify({
-
-                action: "typing",
-
-                username: "{{ request.user.username }}",
-
-                typing: false
-
-            }));
-
-        }, 1000);
-
-    });
+});
 
 </script>
 
 {% endif %}
-
 {% endblock %}
-```

@@ -2,7 +2,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.contrib.auth import logout
+from accounts.models import UserProfile
+
 
 def register(request):
     if request.method == "POST":
@@ -15,16 +16,19 @@ def register(request):
             messages.error(request, "Username already exists")
             return redirect("register")
 
-        User.objects.create_user(
+        user = User.objects.create_user(
             username=username,
             email=email,
             password=password
         )
 
+        UserProfile.objects.get_or_create(user=user)
+
         messages.success(request, "Account created successfully")
         return redirect("login")
 
     return render(request, "register.html")
+
 
 def user_login(request):
 
@@ -39,20 +43,33 @@ def user_login(request):
         )
 
         if user:
+
+            profile, created = UserProfile.objects.get_or_create(
+                user=user
+            )
+
+            profile.is_online = True
+            profile.save()
+
             login(request, user)
+
             return redirect("home")
 
         messages.error(request, "Invalid username or password")
 
     return render(request, "login.html")
 
+
 def user_logout(request):
 
-    profile = request.user.userprofile
+    if request.user.is_authenticated:
 
-    profile.is_online = False
+        profile, created = UserProfile.objects.get_or_create(
+            user=request.user
+        )
 
-    profile.save()
+        profile.is_online = False
+        profile.save()
 
     logout(request)
 

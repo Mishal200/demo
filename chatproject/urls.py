@@ -1,12 +1,12 @@
 from django.contrib import admin
 from django.urls import path, include
-from chat import views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
 
-    path("", views.home, name="home"),
-
+    # Chat App URLs
     path("", include("chat.urls")),
+
+    # Accounts App URLs
     path("accounts/", include("accounts.urls")),
 ]
